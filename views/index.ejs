@@ -1,0 +1,25 @@
+<%- include('partials/header') -%>
+
+  <h1>Send me anonymous messages!</h1>
+
+    <form action="/" method="post">
+        <div class="form-group">
+          <textarea cols="30" rows="5" class="form-control" name='questionInput'></textarea>
+        </div>
+        <button type="submit" name="button" class="btn btn-primary">Send</button>
+    </form>
+
+    <% for(let i=0; i < question.length; i++){ %>
+    <div class='question-answer'>
+        <h3>
+            <%= question[i] %>
+        </h3>
+        <% if(answer[i] !== null) { %>
+        <p>
+            <%= answer[i] %>
+        </p>
+        <% } %>
+    </div>
+    <% } %>
+
+<%- include('partials/footer') -%>
