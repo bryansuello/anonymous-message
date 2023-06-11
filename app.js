@@ -1,4 +1,3 @@
-// making your own ngl anonymouse message app, using everything you've learned so far with the backend
 
 const express = require("express");
 const mongoose = require('mongoose');
@@ -8,47 +7,99 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 app.use(express.static("public"));
 
 mongoose.connect("mongodb://127.0.0.1:27017/anonymousDB", {
-  useNewUrlParser: true
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 });
 
 const questionSchema = {
-  question: String
+  question: String,
+  answers: [{ type: String }]  // Add the 'answers' field to the schema
 };
 
-const Quesiton = mongoose.model("Question", questionSchema);
-
-let questions = [];
-let answers = ["my favourite color is blue.",
-  "I am Bryan Suello",
-  "pisti inatay"
-];
+const Question = mongoose.model("Question", questionSchema);
 
 //////////////////////////////////////////////////////////////////////
 
 app.route("/")
+
   .get((req, res) => {
-    res.render('index', {
-      question: questions,
-      answer: answers
-    });
+
+    Question.find()
+      .populate('answers') // By adding the populate('answers') method chain to the query, you instruct Mongoose to populate the answers field of each question document with the associated answers.
+      .then((questions) => {
+        res.render('index', {
+          questions: questions
+        });
+      })
+      .catch(err => {
+        res.status(500).send(err.message);
+      })
   })
 
   .post((req, res) => {
-    let newQuestion = req.body.questionInput;
-    questions.push(newQuestion);
-    //res.send(`Thanks for the question: ${newQuestion} `);
-    //res.send(questions);
-    //res.sendFile(__dirname + '/public/thanks.html');
-    res.redirect('/');
+    const question = new Question({
+      question: req.body.questionInput,
+    });
+    question.save()
+      .then(() => {
+        console.log('Question added to Database.');
+        res.redirect('/'); // answers keep redirecting to / 
+      })
+      .catch(err => {
+        res.status(400).send("Unable to save question to database.");
+      });
+
   });
 
-app.get('/about', (req, res) => {
-  res.render('about');
-});
+
+app.route('/answers')
+
+  .get((req, res) => {
+
+    Question.find()
+      .populate('answers')
+      .then((questions) => {
+        res.render('answers', {
+          questions: questions,
+        });
+      })
+      .catch(err => {
+        res.status(500).send(err.message);
+      })
+  })
+
+  .post((req, res) => {
+
+    const questionId = req.body.questionId.toString();
+    const answer = req.body.answerInput;
+
+    Question.findByIdAndUpdate(
+      questionId,
+      { $push: { answers: answer } },
+      { new: true } // Add this option to return the updated document
+    )
+      .then((updatedQuestion) => {
+        console.log('Answer added to the question.');
+        console.log(updatedQuestion); // Check if the question is updated in the console
+        res.redirect('/answers');
+      })
+      .catch(err => {
+        res.status(400).send("Unable to save answer to question.");
+      });
+
+  });
+
+
+app.route('/about')
+  .get((req, res) => {
+    res.render('about');
+  });
+
+
+
 
 app.listen(3000, function() {
   console.log("Server started on port 3000");

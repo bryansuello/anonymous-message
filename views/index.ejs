@@ -9,17 +9,17 @@
         <button type="submit" name="button" class="btn btn-primary">Send</button>
     </form>
 
-    <% for(let i=0; i < question.length; i++){ %>
+  <% questions.forEach( question => { %>
     <div class='question-answer'>
         <h3>
-            <%= question[i] %>
+            <%= question.question %>
         </h3>
-        <% if(answer[i] !== null) { %>
-        <p>
-            <%= answer[i] %>
-        </p>
-        <% } %>
+        <% question.answers.forEach( answer => { %>
+          <h5>
+              <%= answer %>
+          </h5>
+        <% }); %>
     </div>
-    <% } %>
+  <% }) %>
 
 <%- include('partials/footer') -%>
