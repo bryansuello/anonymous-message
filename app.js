@@ -9,10 +9,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://127.0.0.1:27017/anonymousDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+mongoose.connect("mongodb+srv://bryansuello:ukr1zjct5@cluster0.9bhawvq.mongodb.net/anonymousDB", { useNewUrlParser: true, useUnifiedTopology: true });
 
 const questionSchema = {
   question: String,
